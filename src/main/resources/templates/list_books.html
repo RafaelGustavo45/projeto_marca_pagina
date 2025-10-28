@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Livraria API - Livros</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .btn-link { margin-right: 10px; text-decoration: none; padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px; }
+        .btn-add { background-color: #4CAF50; color: white; border: none; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin-bottom: 20px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>📚 Catálogo de Livros</h1>
+
+    <a th:href="@{/books/new}" class="btn-add">Adicionar Novo Livro</a>
+
+    <div th:if="${#lists.isEmpty(books)}">
+        <p>Nenhum livro encontrado no catálogo.</p>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(books)}">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Autor</th>
+                    <th>ISBN</th>
+                    <th>Páginas</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="book : ${books}">
+                    <td th:text="${book.id}">1</td>
+                    <td th:text="${book.nome}">O Senhor dos Anéis</td>
+                    <td th:text="${book.autor}">J.R.R. Tolkien</td>
+                    <td th:text="${book.codigoISBN}">9788595150000</td>
+                    <td th:text="${book.quantidadePaginas}">1200</td>
+                    <td>
+                        <a th:href="@{/books/edit/{id}(id=${book.id})}" class="btn-link">Editar</a>
+                        <a th:href="@{/books/delete/{id}(id=${book.id})}" onclick="return confirm('Tem certeza que deseja excluir este livro?');" class="btn-link" style="color: red; border-color: red;">Excluir</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+```eof
+
+### 2. `new_book.html` (Criação - Formulário)
+
+Este arquivo contém o formulário para a criação de um novo livro.
+
+**Localização Esperada:** `src/main/resources/templates/new_book.html`
+
+```html:new_book.html
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Novo Livro</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        form div { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="number"] { width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px; }
+        button[type="reset"] { background-color: #6c757d; }
+    </style>
+</head>
+<body>
+    <h1>Adicionar Novo Livro</h1>
+    
+    <form th:action="@{/books}" th:object="${book}" method="post">
+        
+        <div>
+            <label for="nome">Nome:</label>
+            <input type="text" id="nome" th:field="*{nome}" required>
+        </div>
+        
+        <div>
+            <label for="autor">Autor:</label>
+            <input type="text" id="autor" th:field="*{autor}" required>
+        </div>
+
+        <div>
+            <label for="codigoISBN">Código ISBN:</label>
+            <input type="number" id="codigoISBN" th:field="*{codigoISBN}" required>
+        </div>
+
+        <div>
+            <label for="quantidadePaginas">Quantidade de Páginas:</label>
+            <input type="number" id="quantidadePaginas" th:field="*{quantidadePaginas}" required>
+        </div>
+
+        <button type="submit">Salvar Livro</button>
+        <button type="reset">Limpar</button>
+        <a th:href="@{/books}" style="margin-left: 20px;">Voltar para a Lista</a>
+    </form>
+</body>
+</html>
+```eof
+
+### 3. `edit_book.html` (Edição - Formulário)
+
+Este arquivo é similar ao de criação, mas inclui o campo `id` como oculto para indicar ao servidor qual registro deve ser atualizado.
+
+**Localização Esperada:** `src/main/resources/templates/edit_book.html`
+
+```html:edit_book.html
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Livro</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        form div { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="number"] { width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Editar Livro</h1>
+    
+    <form th:action="@{/books/update/{id}(id=${book.id})}" th:object="${book}" method="post">
+        
+        <input type="hidden" th:field="*{id}">
+        
+        <div>
+            <label for="nome">Nome:</label>
+            <input type="text" id="nome" th:field="*{nome}" required>
+        </div>
+        
+        <div>
+            <label for="autor">Autor:</label>
+            <input type="text" id="autor" th:field="*{autor}" required>
+        </div>
+
+        <div>
+            <label for="codigoISBN">Código ISBN:</label>
+            <input type="number" id="codigoISBN" th:field="*{codigoISBN}" required>
+        </div>
+
+        <div>
+            <label for="quantidadePaginas">Quantidade de Páginas:</label>
+            <input type="number" id="quantidadePaginas" th:field="*{quantidadePaginas}" required>
+        </div>
+
+        <button type="submit">Atualizar Livro</button>
+        <a th:href="@{/books}" style="margin-left: 20px;">Cancelar</a>
+    </form>
+</body>
+</html>
+```eof
+
+### Próximo Passo: Adaptação do Controller
+
+Para que esses arquivos HTML funcionem, você precisa **modificar o `BookController`** para que ele lide com requisições HTTP (GET e POST) que retornam nomes de templates (os arquivos HTML) em vez de apenas dados JSON.
+
+**Gostaria que eu adaptasse o seu `BookController` (que atualmente é RESTful e retorna JSON) para que ele utilize o Thymeleaf e retorne as views HTML acima, implementando o CRUD completo via web?**
